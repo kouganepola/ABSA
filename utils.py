@@ -43,14 +43,27 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
 
         },
         'restaurant': {
-            'train': './data/restaurant/train.raw',
-            'test': './data/restaurant/test.raw',
+            'train': './data/restaurant_1/rest2014train.raw',
+            'test': './data/restaurant_1/rest2014test.raw',
+            # 'train': './data/restaurant/train.raw',
+            # 'test': './data/restaurant/test.raw',
             'validate': './data/restaurant/test.raw'
         },
         'laptop': {
-            'train': './data/laptop/train.raw',
-            'validate': './data/laptop/test_short.raw',
-            'test': './data/laptop/test_short.raw'
+            'train': './data/laptop_1/train.raw',
+            'test': './data/laptop_1/test.raw',
+            # 'train': './data/laptop/train.raw',
+            # 'test': './data/laptop/test_short.raw',
+            'validate': './data/laptop/test_short.raw'
+
+        },
+        'hotel': {
+            'train': './data/laptop_1/train.raw',
+            'test': './data/hotel/hotel.raw',
+            # 'train': './data/laptop/train.raw',
+            # 'test': './data/laptop/test_short.raw',
+            'validate': './data/laptop/test_short.raw'
+
         }
     }
 
@@ -110,9 +123,11 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
                 else:
                     dataset_index.append([1004])
 
+
     polarities = np.array(polarities)
     polarities[polarities==-1]=2
     polarities_matrix = K.eval(tf.one_hot(indices=polarities, depth=polarities_dim+1))
+    polarities = K.eval(tf.one_hot(indices=polarities, depth=polarities_dim))
 
     text_words = word_dict.strip().split()
     print('tokenizing...')
@@ -143,7 +158,7 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
 
     if mode == 'validate' or mode=='test':
         return texts_raw_indices, texts_raw_without_aspects_indices, texts_left_indices, texts_left_with_aspects_indices, \
-               aspects_indices, texts_right_indices, texts_right_with_aspects_indices,dataset_index, polarities_matrix
+               aspects_indices, texts_right_indices, texts_right_with_aspects_indices,dataset_index, polarities_matrix,polarities
 
     print('loading word vectors...')
 
@@ -151,7 +166,7 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
 
     return texts_raw_indices, texts_raw_without_aspects_indices, texts_left_indices, texts_left_with_aspects_indices, \
            aspects_indices, texts_right_indices, texts_right_with_aspects_indices, \
-           dataset_index,polarities_matrix, \
+           dataset_index,polarities_matrix,polarities, \
            embedding_matrix, \
            tokenizer
 
