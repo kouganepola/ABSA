@@ -1,4 +1,5 @@
 import pickle
+from sklearn.model_selection import train_test_split, StratifiedKFold
 import string
 import numpy as np
 import tensorflow as tf
@@ -34,23 +35,23 @@ def load_word_vec( embedding_dim=100):
 
 
 def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100, max_seq_len=40, max_aspect_len=3, polarities_dim=3):
-    print("preparing data...")
+    #print("preparing data...")
     fname = {
         'twitter': {
-            'train': './data/twitter/train.raw',
+            'train': './data/twitter/all.raw',
             'test': './data/twitter/test.raw',
             'validate':'./data/twitter/test.raw'
 
         },
         'restaurant': {
-            'train': './data/restaurant_1/rest2014train.raw',
+            'train': './data/restaurant_1/all.raw',
             'test': './data/restaurant_1/rest2014test.raw',
             # 'train': './data/restaurant/train.raw',
             # 'test': './data/restaurant/test.raw',
             'validate': './data/restaurant/test.raw'
         },
         'laptop': {
-            'train': './data/laptop_1/train.raw',
+            'train': './data/laptop_1/all.raw',
             'test': './data/laptop_1/test.raw',
             # 'train': './data/laptop/train.raw',
             # 'test': './data/laptop/test_short.raw',
@@ -124,13 +125,13 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
                     dataset_index.append([1004])
 
 
-    polarities = np.array(polarities)
-    polarities[polarities==-1]=2
-    polarities_matrix = K.eval(tf.one_hot(indices=polarities, depth=polarities_dim+1))
-    polarities = K.eval(tf.one_hot(indices=polarities, depth=polarities_dim))
+    polarities_k = np.array(polarities)
+    polarities_k[polarities_k==-1]=2
+    polarities_matrix = K.eval(tf.one_hot(indices=polarities_k, depth=polarities_dim+1))
+    polarities = K.eval(tf.one_hot(indices=polarities_k, depth=polarities_dim))
 
     text_words = word_dict.strip().split()
-    print('tokenizing...')
+    #print('tokenizing...')
     tokenizer = Tokenizer(filters="\t\n")
     tokenizer.fit_on_texts(text_words)
 
@@ -158,17 +159,38 @@ def read_dataset(types=['twitter','restaurant'], mode='train', embedding_dim=100
 
     if mode == 'validate' or mode=='test':
         return texts_raw_indices, texts_raw_without_aspects_indices, texts_left_indices, texts_left_with_aspects_indices, \
-               aspects_indices, texts_right_indices, texts_right_with_aspects_indices,dataset_index, polarities_matrix,polarities
+               aspects_indices, texts_right_indices, texts_right_with_aspects_indices,dataset_index, polarities_matrix,polarities_k
 
-    print('loading word vectors...')
+    #print('loading word vectors...')
 
     embedding_matrix = word_vec
 
     return texts_raw_indices, texts_raw_without_aspects_indices, texts_left_indices, texts_left_with_aspects_indices, \
            aspects_indices, texts_right_indices, texts_right_with_aspects_indices, \
-           dataset_index,polarities_matrix,polarities, \
+           dataset_index,polarities_matrix,polarities_k, \
            embedding_matrix, \
            tokenizer
+
+def load_data_kfold(k,dataset,emb_dim = 100,seq_len=40,aspect_len=5):
+    texts_raw_indices, texts_raw_without_aspects_indices, texts_left_indices, texts_left_with_aspects_indices, \
+    aspects_indices, texts_right_indices, texts_right_with_aspects_indices, dataset_index, \
+    polarities_matrix, polarities_k, \
+    embedding_matrix, \
+    tokenizer = \
+        read_dataset(types=dataset,
+                     mode='train',
+                     embedding_dim=emb_dim,
+                     max_seq_len=seq_len, max_aspect_len=aspect_len)
+
+    X_train = [texts_left_indices,texts_right_indices,dataset_index,aspects_indices]
+    X = texts_right_indices
+
+    y = polarities_k
+    y_train=polarities_matrix
+
+    folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(X, y))
+
+    return folds, X_train, y_train
 
 def textCleaner(words):
     return_string = []
