@@ -144,7 +144,29 @@ class MTLABSA:
                         validation_split=0.1,
                        shuffle=True,
                        epochs=self.EPOCHS, batch_size=self.BATCH_SIZE,
-                       callbacks=[msCallBack],verbose=1)
+                       callbacks=[msCallBack],verbose=0)
+
+
+    def test_unseen(self):
+        laptop_texts_raw_indices, laptop_texts_raw_without_aspects_indices, laptop_texts_left_indices, laptop_texts_left_with_aspects_indices, \
+        laptop_aspects_indices, laptop_texts_right_indices, laptop_texts_right_with_aspects_indices, laptop_dataset_index, \
+        laptop_polarities_matrix, laptop_polarities = \
+            read_dataset(types=['twitter'],
+                         mode='test',
+                         embedding_dim=self.EMBEDDING_DIM,
+                         max_seq_len=self.MAX_SENTENCE_LENGTH, max_aspect_len=self.MAX_ASPECT_LENGTH)
+        self.model.evaluate([laptop_texts_left_indices, laptop_texts_right_indices, laptop_dataset_index], \
+                            [laptop_polarities_matrix, laptop_polarities_matrix, laptop_polarities_matrix], steps=1)
+
+        hotel_texts_raw_indices, hotel_texts_raw_without_aspects_indices, hotel_texts_left_indices, hotel_texts_left_with_aspects_indices, \
+        hotel_aspects_indices, hotel_texts_right_indices, hotel_texts_right_with_aspects_indices, hotel_dataset_index, \
+        hotel_polarities_matrix, hotel_polarities = \
+            read_dataset(types=['hotel'],
+                         mode='test',
+                         embedding_dim=self.EMBEDDING_DIM,
+                         max_seq_len=self.MAX_SENTENCE_LENGTH, max_aspect_len=self.MAX_ASPECT_LENGTH)
+        self.model.evaluate([hotel_texts_left_indices, hotel_texts_right_indices, hotel_dataset_index], \
+                            [hotel_polarities_matrix, hotel_polarities_matrix, hotel_polarities_matrix], steps=1)
 
 
     def test(self,X,y):
@@ -172,25 +194,7 @@ class MTLABSA:
         #
 
         self.model.evaluate(X, [y, y, y], steps=1)
-        laptop_texts_raw_indices, laptop_texts_raw_without_aspects_indices, laptop_texts_left_indices, laptop_texts_left_with_aspects_indices, \
-        laptop_aspects_indices, laptop_texts_right_indices, laptop_texts_right_with_aspects_indices, laptop_dataset_index, \
-        laptop_polarities_matrix,laptop_polarities = \
-            read_dataset(types=['laptop'],
-                         mode='test',
-                         embedding_dim=self.EMBEDDING_DIM,
-                         max_seq_len=self.MAX_SENTENCE_LENGTH, max_aspect_len=self.MAX_ASPECT_LENGTH)
-        self.model.evaluate([laptop_texts_left_indices,laptop_texts_right_indices,laptop_dataset_index],\
-                            [laptop_polarities_matrix,laptop_polarities_matrix,laptop_polarities_matrix],steps=1)
 
-        hotel_texts_raw_indices, hotel_texts_raw_without_aspects_indices, hotel_texts_left_indices, hotel_texts_left_with_aspects_indices, \
-        hotel_aspects_indices, hotel_texts_right_indices, hotel_texts_right_with_aspects_indices, hotel_dataset_index, \
-        hotel_polarities_matrix, hotel_polarities = \
-            read_dataset(types=['hotel'],
-                         mode='test',
-                         embedding_dim=self.EMBEDDING_DIM,
-                         max_seq_len=self.MAX_SENTENCE_LENGTH, max_aspect_len=self.MAX_ASPECT_LENGTH)
-        self.model.evaluate([hotel_texts_left_indices, hotel_texts_right_indices, hotel_dataset_index], \
-                            [hotel_polarities_matrix, hotel_polarities_matrix, hotel_polarities_matrix], steps=1)
 
 
 

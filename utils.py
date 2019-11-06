@@ -190,7 +190,7 @@ def load_data_kfold(k,dataset,emb_dim = 100,seq_len=40,aspect_len=5):
 
     folds = list(StratifiedKFold(n_splits=k, shuffle=True, random_state=1).split(X, y))
 
-    return folds, X_train, y_train
+    return folds, X_train, y_train, y
 
 def textCleaner(words):
     return_string = []
